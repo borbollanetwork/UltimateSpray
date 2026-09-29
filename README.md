@@ -1,3 +1,5 @@
+![UltimateSpray — AWS API Gateway proxy orchestration for authorized security assessments](assets/ultimatespray-banner.svg)
+
 # UltimateSpray
 
 Rotating source-IP proxies via AWS API Gateway — tuned for password spraying and
