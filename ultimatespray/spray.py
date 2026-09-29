@@ -3,11 +3,11 @@
 ``RotatingProxy`` is a thin ``requests.Session`` wrapper that:
 
 * round-robins across one or more proxy base URLs, and
-* spoofs a random ``X-My-X-Forwarded-For`` header per request, which the proxy
-  maps onto ``X-Forwarded-For`` at the destination.
+* can optionally add a random ``X-My-X-Forwarded-For`` header per request,
+  which the proxy maps onto ``X-Forwarded-For`` at the destination.
 
 The API Gateway already rotates the true source IP on every request; the
-spoofed header adds an extra layer for targets that read X-Forwarded-For.
+The spoofed header is disabled by default so the request provenance is preserved.
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ class RotatingProxy:
     def __init__(
         self,
         proxy_urls: Iterable[str],
-        spoof_forwarded_for: bool = True,
+        spoof_forwarded_for: bool = False,
         session: requests.Session | None = None,
     ) -> None:
         urls = [u.rstrip("/") for u in proxy_urls if u]

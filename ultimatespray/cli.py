@@ -17,12 +17,14 @@ prints a deprecation warning.
 from __future__ import annotations
 
 import argparse
+import getpass
 import json
 import logging
 import sys
 
 from ultimatespray import __version__
 from ultimatespray.core import DEFAULT_REGION, CredentialError, UltimateSpray
+from ultimatespray.simulate import build_report, load_users, validate_url, write_report
 from ultimatespray.spray import RotatingProxy
 
 logger = logging.getLogger("ultimatespray")
@@ -33,7 +35,7 @@ CRED_ARGS = ("profile_name", "access_key", "secret_access_key", "session_token",
 def _add_credential_args(parser: argparse.ArgumentParser) -> None:
     group = parser.add_argument_group("AWS credentials")
     group.add_argument("--profile", "--profile_name", dest="profile_name",
-                       help="AWS profile name to load/store credentials")
+                       help="AWS profile name to load credentials")
     group.add_argument("--access-key", "--access_key", dest="access_key",
                        help="AWS access key")
     group.add_argument("--secret-access-key", "--secret_access_key",
@@ -81,6 +83,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_check.add_argument("proxy_url", nargs="+", help="Proxy URL(s) to test")
     p_check.add_argument("--count", type=int, default=5, help="Requests to send")
     p_check.add_argument("--path", default="/", help="Path to request")
+
+    p_simulate = sub.add_parser("simulate", help="Preview an offline test without requests")
+    p_simulate.add_argument("--users", help="File with one username per line")
+    p_simulate.add_argument("--url", help="Target URL to show in the preview")
+    p_simulate.add_argument("--output", help="New JSON report file")
 
     return parser
 
@@ -152,13 +159,36 @@ def cmd_cleanup(args: argparse.Namespace) -> int:
 
 
 def cmd_spray_check(args: argparse.Namespace) -> int:
+    if args.count < 1:
+        raise ValueError("--count must be at least 1")
     proxy = RotatingProxy(args.proxy_url)
+    failures = 0
     for i in range(args.count):
         try:
             resp = proxy.get(args.path, timeout=15)
             print(f"[{i + 1}/{args.count}] {resp.status_code} {resp.url}")
         except Exception as exc:  # noqa: BLE001
+            failures += 1
             print(f"[{i + 1}/{args.count}] ERROR: {exc}")
+    return 1 if failures else 0
+
+
+def cmd_simulate(args: argparse.Namespace) -> int:
+    users_path = args.users or input("Arquivo da lista de usuários: ").strip()
+    target_url = args.url or input("URL para o teste: ").strip()
+    output_path = args.output or input("Arquivo de saída JSON: ").strip()
+    if not output_path:
+        raise ValueError("An output file is required")
+    users = load_users(users_path)
+    url = validate_url(target_url)
+    if not sys.stdin.isatty():
+        raise ValueError("Interactive terminal required for the password prompt")
+    if not getpass.getpass("Senha (não será enviada nem salva): "):
+        raise ValueError("A password is required for this preview")
+    report = build_report(users, url)
+    write_report(output_path, report)
+    print(f"Simulação concluída: {len(users)} usuário(s), 0 requisições; todos não testados.")
+    print(f"Relatório: {output_path}")
     return 0
 
 
@@ -169,6 +199,7 @@ DISPATCH = {
     "delete": cmd_delete,
     "cleanup": cmd_cleanup,
     "spray-check": cmd_spray_check,
+    "simulate": cmd_simulate,
 }
 
 

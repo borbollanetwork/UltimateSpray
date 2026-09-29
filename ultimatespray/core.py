@@ -84,6 +84,21 @@ class UltimateSpray:
         config.read(os.path.expanduser("~/.aws/config"))
         config_profile_section = f"profile {self.profile_name}"
 
+        if self.access_key and self.secret_access_key:
+            try:
+                self.client = self._client(
+                    aws_access_key_id=self.access_key,
+                    aws_secret_access_key=self.secret_access_key,
+                    aws_session_token=self.session_token,
+                    region_name=self.region,
+                )
+                self.client.get_account()
+                self.region = self.client._client_config.region_name
+                return True
+            except (BotoCoreError, ClientError) as exc:
+                logger.error("Access key credentials failed: %s", exc)
+                return False
+
         if self.profile_name and self.profile_name in credentials:
             if config_profile_section not in config:
                 logger.error(
@@ -101,41 +116,7 @@ class UltimateSpray:
             except (BotoCoreError, ClientError) as exc:
                 logger.debug("Profile %s failed: %s", self.profile_name, exc)
 
-        if self.access_key and self.secret_access_key:
-            try:
-                self.client = self._client(
-                    aws_access_key_id=self.access_key,
-                    aws_secret_access_key=self.secret_access_key,
-                    aws_session_token=self.session_token,
-                    region_name=self.region,
-                )
-                self.client.get_account()
-                self.region = self.client._client_config.region_name
-                if self.profile_name:
-                    self._persist_profile(config, credentials, config_profile_section)
-                return True
-            except (BotoCoreError, ClientError) as exc:
-                logger.error("Access key credentials failed: %s", exc)
-                return False
         return False
-
-    def _persist_profile(self, config, credentials, section: str) -> None:
-        """Save supplied keys under the given profile in ~/.aws for reuse."""
-        if section not in config:
-            config.add_section(section)
-        config[section]["region"] = self.region
-        with open(os.path.expanduser("~/.aws/config"), "w") as fh:
-            config.write(fh)
-        if self.profile_name not in credentials:
-            credentials.add_section(self.profile_name)
-        credentials[self.profile_name]["aws_access_key_id"] = self.access_key
-        credentials[self.profile_name]["aws_secret_access_key"] = self.secret_access_key
-        if self.session_token:
-            credentials[self.profile_name]["aws_session_token"] = self.session_token
-        elif credentials.has_option(self.profile_name, "aws_session_token"):
-            credentials.remove_option(self.profile_name, "aws_session_token")
-        with open(os.path.expanduser("~/.aws/credentials"), "w") as fh:
-            credentials.write(fh)
 
     # --------------------------------------------------------------- proxy ops
     def _proxy_url(self, api_id: str) -> str:
@@ -154,7 +135,14 @@ class UltimateSpray:
             body=build_template(url),
         )
         api_id = response["id"]
-        self._create_deployment(api_id)
+        try:
+            self.client.tag_resource(
+                resourceArn=self._api_arn(api_id), tags={"ultimatespray:managed": "true"}
+            )
+            self._create_deployment(api_id)
+        except Exception:
+            self.client.delete_rest_api(restApiId=api_id)
+            raise
         return {
             "api_id": api_id,
             "name": response["name"],
@@ -213,10 +201,10 @@ class UltimateSpray:
         return result
 
     def cleanup(self) -> list[str]:
-        """Delete every proxy this tool created (name prefix match)."""
+        """Delete tagged UltimateSpray proxies in the current region."""
         deleted = []
         for item in self._get_apis():
-            if item.get("name", "").startswith(NAME_PREFIX):
+            if self._is_managed(item):
                 self.client.delete_rest_api(restApiId=item["id"])
                 deleted.append(item["id"])
                 logger.info("Deleted %s (%s)", item["id"], item["name"])
@@ -224,7 +212,23 @@ class UltimateSpray:
 
     # ------------------------------------------------------------------ helpers
     def _get_apis(self) -> list[dict]:
-        return self.client.get_rest_apis().get("items", [])
+        items = []
+        position = None
+        while True:
+            response = self.client.get_rest_apis(**({"position": position} if position else {}))
+            items.extend(response.get("items", []))
+            position = response.get("position")
+            if not position:
+                return items
+
+    def _api_arn(self, api_id: str) -> str:
+        return f"arn:aws:apigateway:{self.region}::/restapis/{api_id}"
+
+    def _is_managed(self, item: dict) -> bool:
+        if not item.get("name", "").startswith(NAME_PREFIX):
+            return False
+        tags = self.client.get_tags(resourceArn=self._api_arn(item["id"])).get("tags", {})
+        return tags.get("ultimatespray:managed") == "true"
 
     def _create_deployment(self, api_id: str) -> str:
         response = self.client.create_deployment(

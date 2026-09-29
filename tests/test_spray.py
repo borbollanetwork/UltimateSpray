@@ -23,7 +23,7 @@ def test_requires_at_least_one_url():
         RotatingProxy([])
 
 
-def test_round_robin_and_spoof_header():
+def test_round_robin_without_spoof_header_by_default():
     session = FakeSession()
     proxy = RotatingProxy(
         ["https://a.example/stage/", "https://b.example/stage/"], session=session
@@ -37,15 +37,13 @@ def test_round_robin_and_spoof_header():
         "https://b.example/stage/login",
         "https://a.example/stage/login",
     ]
-    assert all(FORWARD_HEADER in c[2]["headers"] for c in session.calls)
+    assert all(FORWARD_HEADER not in c[2].get("headers", {}) for c in session.calls)
 
 
-def test_spoof_can_be_disabled():
+def test_spoof_requires_explicit_opt_in():
     session = FakeSession()
     proxy = RotatingProxy(
-        ["https://a.example/"], spoof_forwarded_for=False, session=session
+        ["https://a.example/"], spoof_forwarded_for=True, session=session
     )
     proxy.get("/x")
-    assert "headers" not in session.calls[0][2] or FORWARD_HEADER not in (
-        session.calls[0][2].get("headers", {})
-    )
+    assert FORWARD_HEADER in session.calls[0][2]["headers"]

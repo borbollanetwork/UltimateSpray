@@ -53,3 +53,14 @@ def test_cleanup_requires_confirmation_or_yes():
         rc = cli.main(["cleanup", "--yes"])
     assert rc == 0
     fake.cleanup.assert_called_once()
+
+
+def test_spray_check_reports_request_failures():
+    with mock.patch.object(cli, "RotatingProxy") as proxy_class:
+        proxy_class.return_value.get.side_effect = OSError("network unavailable")
+        rc = cli.main(["spray-check", "https://proxy.example/", "--count", "1"])
+    assert rc == 1
+
+
+def test_spray_check_rejects_zero_requests():
+    assert cli.main(["spray-check", "https://proxy.example/", "--count", "0"]) == 1

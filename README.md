@@ -21,7 +21,7 @@ Information Security.
 - **Multi-region create** — `create <url> --regions us-east-1,eu-west-1` spins up
   a proxy per region for more IP diversity.
 - **`RotatingProxy` helper** (`ultimatespray.spray`) — a `requests.Session`
-  wrapper that round-robins a proxy pool and spoofs `X-Forwarded-For` per request.
+  wrapper that round-robins a proxy pool. Forwarded-header spoofing is off by default.
 - **`--json` output**, proper logging, installable package (`ultimatespray` / `us`
   console scripts), slim non-root Docker image, and CI.
 - Backward compatible: the legacy `--command create --url ...` interface still
@@ -53,7 +53,7 @@ ultimatespray list
 ultimatespray update <api_id> https://new-target.example.com
 ultimatespray delete <api_id>
 
-# Delete ALL proxies this tool created (in the current region)
+# Delete tagged proxies this tool created (in the current region)
 ultimatespray cleanup --yes
 
 # Smoke-test a proxy
@@ -65,6 +65,20 @@ ultimatespray --json list
 
 `us` is a short alias for `ultimatespray`.
 
+### Offline preview
+
+`simulate` reads a user list, prompts for a password without echoing it, and
+writes a JSON preview. It does not send requests or create AWS resources. Every
+user is reported as `not_tested`; it never claims a credential match.
+
+```bash
+ultimatespray simulate --users ./lab-users.txt \
+  --url https://lab.example.test/login --output ./preview.json
+```
+
+Omit the three options to enter the file path, URL, and output path interactively.
+The password is never included in the report. The output file must not exist yet.
+
 ### Credentials
 
 Resolved in this order:
@@ -73,8 +87,10 @@ Resolved in this order:
 2. `--profile <name>` (read from `~/.aws/`)
 3. The ambient boto3 chain (env vars, SSO, instance profile)
 
-Passing `--profile` together with access keys saves them under that profile for
-reuse.
+Explicit access keys take precedence over `--profile` and are never saved by the tool.
+New proxies are tagged `ultimatespray:managed=true`; `cleanup` deletes only tagged
+proxies. Existing untagged proxies must be deleted by API ID. AWS credentials need
+permission to tag resources and read tags for these commands.
 
 ## Library / spraying
 
