@@ -1,63 +1,68 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="360" viewBox="0 0 1400 360" role="img" aria-labelledby="title desc">
-  <title id="title">UltimateSpray</title>
-  <desc id="desc">AWS API Gateway proxy orchestration for authorized security assessments.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="410" viewBox="0 0 1400 410" role="img" aria-labelledby="title desc">
+  <title id="title">UltimateSpray: from authorized scope to evidence</title>
+  <desc id="desc">A conceptual overview connecting test scope, AWS API Gateway infrastructure, identity signals, and verified findings.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#071321"/>
-      <stop offset="0.55" stop-color="#10283a"/>
-      <stop offset="1" stop-color="#0a1728"/>
+      <stop offset="0" stop-color="#081423"/>
+      <stop offset="0.58" stop-color="#102a3b"/>
+      <stop offset="1" stop-color="#0a1929"/>
     </linearGradient>
     <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#43e0d2"/>
-      <stop offset="1" stop-color="#7ab7ff"/>
+      <stop offset="0" stop-color="#50dfd0"/>
+      <stop offset="1" stop-color="#8abaff"/>
     </linearGradient>
-    <radialGradient id="glow">
-      <stop offset="0" stop-color="#2accc8" stop-opacity="0.25"/>
-      <stop offset="1" stop-color="#2accc8" stop-opacity="0"/>
+    <radialGradient id="halo">
+      <stop offset="0" stop-color="#37c9c8" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#37c9c8" stop-opacity="0"/>
     </radialGradient>
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M40 0H0V40" fill="none" stroke="#76a3b9" stroke-opacity="0.08"/>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
+      <path d="M42 0H0V42" fill="none" stroke="#a7d7df" stroke-opacity="0.055"/>
     </pattern>
   </defs>
 
-  <rect width="1400" height="360" rx="22" fill="url(#background)"/>
-  <rect width="1400" height="360" rx="22" fill="url(#grid)"/>
-  <circle cx="1120" cy="185" r="260" fill="url(#glow)"/>
-  <rect x="54" y="66" width="7" height="228" rx="3.5" fill="url(#accent)"/>
+  <rect width="1400" height="410" rx="24" fill="url(#background)"/>
+  <rect width="1400" height="410" rx="24" fill="url(#grid)"/>
+  <circle cx="705" cy="310" r="400" fill="url(#halo)"/>
+  <path d="M70 160h1260" stroke="url(#accent)" stroke-opacity="0.32"/>
 
-  <text x="100" y="151" fill="#f1f7fb" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="76" font-weight="800" letter-spacing="-3">
-    Ultimate<tspan fill="#51dace">Spray</tspan>
-  </text>
-  <text x="103" y="203" fill="#bad1df" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="500">
-    AWS API Gateway proxy orchestration
-  </text>
-  <rect x="102" y="235" width="262" height="42" rx="21" fill="#153a45" stroke="#3fcac4" stroke-opacity="0.55"/>
-  <text x="233" y="262" text-anchor="middle" fill="#80eee1" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="700" letter-spacing="1.1">
-    AUTHORIZED TESTING
-  </text>
+  <text x="72" y="103" fill="#f1f8fb" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-2.7">Ultimate<tspan fill="#57ded1">Spray</tspan></text>
+  <text x="75" y="139" fill="#b8d0dd" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="500">A macro view of an authorized identity security assessment</text>
 
-  <g fill="none" stroke="#6ed4d5" stroke-width="2.5" stroke-linecap="round">
-    <path d="M1075 180 953 103" stroke-opacity="0.58"/>
-    <path d="M1075 180 1233 91" stroke-opacity="0.58"/>
-    <path d="M1075 180 1263 223" stroke-opacity="0.58"/>
-    <path d="M1075 180 994 283" stroke-opacity="0.58"/>
+  <g fill="none" stroke="#6fcece" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M348 266h38"/><path d="m378 258 10 8-10 8"/>
+    <path d="M678 266h38"/><path d="m708 258 10 8-10 8"/>
+    <path d="M1008 266h38"/><path d="m1038 258 10 8-10 8"/>
   </g>
-  <g fill="#112d3f" stroke="#70d8d7" stroke-width="3">
-    <circle cx="953" cy="103" r="25"/>
-    <circle cx="1233" cy="91" r="25"/>
-    <circle cx="1263" cy="223" r="25"/>
-    <circle cx="994" cy="283" r="25"/>
+  <g fill="#102b3b" stroke="#79c9d1" stroke-opacity="0.4" stroke-width="1.5">
+    <rect x="70" y="188" width="278" height="173" rx="20"/>
+    <rect x="400" y="188" width="278" height="173" rx="20"/>
+    <rect x="730" y="188" width="278" height="173" rx="20"/>
+    <rect x="1060" y="188" width="278" height="173" rx="20"/>
   </g>
-  <g fill="#7ce9df">
-    <circle cx="953" cy="103" r="5"/>
-    <circle cx="1233" cy="91" r="5"/>
-    <circle cx="1263" cy="223" r="5"/>
-    <circle cx="994" cy="283" r="5"/>
+  <g fill="#15394a">
+    <circle cx="209" cy="241" r="36"/><circle cx="539" cy="241" r="36"/>
+    <circle cx="869" cy="241" r="36"/><circle cx="1199" cy="241" r="36"/>
   </g>
-  <circle cx="1075" cy="180" r="78" fill="#102f40" stroke="url(#accent)" stroke-width="4"/>
-  <path d="M1036 167h78m-63-19h48m-48 38h48m-63 18h78" fill="none" stroke="#83ece2" stroke-width="5" stroke-linecap="round"/>
-  <text x="1075" y="232" text-anchor="middle" fill="#bad1df" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2">
-    API GATEWAY
-  </text>
-  <rect x="0.5" y="0.5" width="1399" height="359" rx="21.5" fill="none" stroke="#7bb7c7" stroke-opacity="0.25"/>
+
+  <g fill="none" stroke="#78e6dc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="195" y="224" width="28" height="34" rx="3"/>
+    <path d="M201 233h16M201 241h10m-10 8 4 4 8-9"/>
+    <path d="m539 225 13 8v16l-13 8-13-8v-16z"/>
+    <circle cx="539" cy="241" r="3" fill="#78e6dc" stroke="none"/>
+    <path d="M526 234h-10m36 0h10m-23 23v8"/>
+    <path d="m869 220 17 7v14c0 12-7 19-17 24-10-5-17-12-17-24v-14z"/>
+    <path d="m861 242 6 6 11-13"/>
+    <rect x="1185" y="223" width="28" height="36" rx="3"/>
+    <path d="M1191 251v-7m8 7v-15m8 15v-11"/>
+  </g>
+
+  <g fill="#f0f7fa" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="750" letter-spacing="1.1" text-anchor="middle">
+    <text x="209" y="311">SCOPE</text><text x="539" y="311">INFRASTRUCTURE</text>
+    <text x="869" y="311">IDENTITY</text><text x="1199" y="311">EVIDENCE</text>
+  </g>
+  <g fill="#a9c7d2" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" text-anchor="middle">
+    <text x="209" y="337">Authorized targets</text><text x="539" y="337">AWS API Gateway</text>
+    <text x="869" y="337">Authentication signals</text><text x="1199" y="337">Verified outcomes</text>
+  </g>
+  <rect x="0.5" y="0.5" width="1399" height="409" rx="23.5" fill="none" stroke="#86bdc9" stroke-opacity="0.24"/>
 </svg>

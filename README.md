@@ -1,27 +1,40 @@
-![UltimateSpray — AWS API Gateway proxy orchestration for authorized security assessments](assets/ultimatespray-banner.svg)
+![UltimateSpray assessment overview: scope, infrastructure, identity, and evidence](assets/ultimatespray-banner.svg)
 
 # UltimateSpray
 
-Rotating source-IP proxies via AWS API Gateway — tuned for password spraying and
-high-volume web requests.
-
-UltimateSpray creates pass-through proxies on the AWS API Gateway. Every request
-you send through a proxy URL exits from a **fresh source IP address**, which
-makes per-IP rate limits and lockouts far less effective. It is a modernized
-fork of [FireProx](https://github.com/ustayready/fireprox) by Black Hills
-Information Security.
+UltimateSpray manages AWS API Gateway pass-through proxies for authorized
+identity-security assessments, including controlled password-spray testing.
+It supports multi-region proxy management and an offline preview of test inputs
+and report structure. It is a modernized fork of
+[FireProx](https://github.com/ustayready/fireprox) by Black Hills Information
+Security.
 
 > ⚠️ **Authorized use only.** Use this tool only against systems you own or have
 > explicit written permission to test. Misuse may violate the
 > [AWS Acceptable Use Policy](https://aws.amazon.com/aup/) and the law.
 
+## Assessment overview
+
+At a high level, an assessment moves through four stages:
+
+| Stage | Purpose |
+| --- | --- |
+| Scope | Define the authorized targets and test boundaries. |
+| Infrastructure | Manage the AWS API Gateway resources used by the assessment. |
+| Identity | Observe responses from the approved identity surface. |
+| Evidence | Record outcomes with enough context to distinguish confirmed results from inconclusive responses. |
+
+The proxy manager handles infrastructure; an HTTP redirect or status code alone
+does not prove that a credential is valid. `simulate` makes no network requests
+and reports every account as `not_tested`.
+
 ## What's new vs. FireProx
 
 - **Simple subcommands** with positional args and sane defaults (region defaults
   to `us-east-1`, credentials auto-resolved).
-- **`cleanup`** — delete every proxy the tool created in one command.
+- **`cleanup`** — delete tagged proxies the tool created in one command.
 - **Multi-region create** — `create <url> --regions us-east-1,eu-west-1` spins up
-  a proxy per region for more IP diversity.
+  a managed proxy in each selected region.
 - **`RotatingProxy` helper** (`ultimatespray.spray`) — a `requests.Session`
   wrapper that round-robins a proxy pool. Forwarded-header spoofing is off by default.
 - **`--json` output**, proper logging, installable package (`ultimatespray` / `us`
