@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ultimatespray"
+version = "2.0.0"
+description = "Rotating source-IP proxies via AWS API Gateway, tuned for password spraying"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "Renato D'Aquino" }]
+keywords = ["aws", "api-gateway", "proxy", "pentest", "password-spraying", "ip-rotation"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Environment :: Console",
+    "Topic :: Security",
+]
+dependencies = [
+    "boto3>=1.28",
+    "tldextract>=3.4",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+examples = ["beautifulsoup4>=4.12", "lxml>=4.9"]
+dev = ["ruff>=0.4", "pytest>=8.0"]
+
+[project.scripts]
+ultimatespray = "ultimatespray.cli:main"
+us = "ultimatespray.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/borbollanetwork/UltimateSpray"
+
+[tool.setuptools.packages.find]
+include = ["ultimatespray*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+extend-exclude = ["build", "dist", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]

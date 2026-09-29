@@ -1,0 +1,8 @@
+# Core runtime dependencies. Prefer `pip install .` (see pyproject.toml).
+boto3>=1.28
+tldextract>=3.4
+requests>=2.31
+
+# Optional: needed only for the search-engine scraper examples.
+beautifulsoup4>=4.12
+lxml>=4.9

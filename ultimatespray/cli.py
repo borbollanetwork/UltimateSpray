@@ -1,0 +1,217 @@
+"""Command-line interface for UltimateSpray.
+
+Modern subcommands (positional args, sensible defaults):
+
+    ultimatespray create https://target.example.com
+    ultimatespray create https://target.example.com --regions us-east-1,eu-west-1
+    ultimatespray list
+    ultimatespray update <api_id> https://new-target
+    ultimatespray delete <api_id>
+    ultimatespray cleanup --yes
+    ultimatespray spray-check https://<id>.execute-api.us-east-1.amazonaws.com/ultimatespray/
+
+The legacy FireProx interface (``--command create --url ...``) still works but
+prints a deprecation warning.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import logging
+import sys
+
+from ultimatespray import __version__
+from ultimatespray.core import DEFAULT_REGION, CredentialError, UltimateSpray
+from ultimatespray.spray import RotatingProxy
+
+logger = logging.getLogger("ultimatespray")
+
+CRED_ARGS = ("profile_name", "access_key", "secret_access_key", "session_token", "region")
+
+
+def _add_credential_args(parser: argparse.ArgumentParser) -> None:
+    group = parser.add_argument_group("AWS credentials")
+    group.add_argument("--profile", "--profile_name", dest="profile_name",
+                       help="AWS profile name to load/store credentials")
+    group.add_argument("--access-key", "--access_key", dest="access_key",
+                       help="AWS access key")
+    group.add_argument("--secret-access-key", "--secret_access_key",
+                       dest="secret_access_key", help="AWS secret access key")
+    group.add_argument("--session-token", "--session_token", dest="session_token",
+                       help="AWS session token")
+    group.add_argument("--region", help=f"AWS region (default: {DEFAULT_REGION})")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="ultimatespray",
+        description="UltimateSpray - rotating source-IP proxies via AWS API Gateway",
+    )
+    parser.add_argument("--version", action="version",
+                        version=f"%(prog)s {__version__}")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging")
+    parser.add_argument("--json", action="store_true", help="Machine-readable output")
+    _add_credential_args(parser)
+
+    # Legacy FireProx flags (deprecated, still routed).
+    parser.add_argument("--command", help=argparse.SUPPRESS)
+    parser.add_argument("--url", help=argparse.SUPPRESS)
+    parser.add_argument("--api_id", help=argparse.SUPPRESS)
+
+    sub = parser.add_subparsers(dest="subcommand", metavar="<command>")
+
+    p_create = sub.add_parser("create", help="Create a proxy for a target URL")
+    p_create.add_argument("url", help="Target URL to proxy")
+    p_create.add_argument("--regions", help="Comma-separated regions (one proxy each)")
+
+    sub.add_parser("list", help="List existing proxies")
+
+    p_update = sub.add_parser("update", help="Point an existing proxy at a new URL")
+    p_update.add_argument("api_id", help="API ID to update")
+    p_update.add_argument("url", help="New target URL")
+
+    p_delete = sub.add_parser("delete", help="Delete a proxy by API ID")
+    p_delete.add_argument("api_id", help="API ID to delete")
+
+    p_cleanup = sub.add_parser("cleanup", help="Delete ALL UltimateSpray proxies")
+    p_cleanup.add_argument("--yes", action="store_true", help="Skip confirmation")
+
+    p_check = sub.add_parser("spray-check", help="Send test requests through a proxy")
+    p_check.add_argument("proxy_url", nargs="+", help="Proxy URL(s) to test")
+    p_check.add_argument("--count", type=int, default=5, help="Requests to send")
+    p_check.add_argument("--path", default="/", help="Path to request")
+
+    return parser
+
+
+def _client(args: argparse.Namespace) -> UltimateSpray:
+    return UltimateSpray(
+        profile_name=args.profile_name,
+        access_key=args.access_key,
+        secret_access_key=args.secret_access_key,
+        session_token=args.session_token,
+        region=args.region,
+    )
+
+
+def _emit(records, as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(records, indent=2))
+        return
+    items = records if isinstance(records, list) else [records]
+    for r in items:
+        print(f"[{r['created']}] ({r['api_id']}) {r['name']} "
+              f"[{r['region']}]: {r['proxy_url']} => {r['target']}")
+
+
+# ---------------------------------------------------------------- subcommands
+def cmd_create(args: argparse.Namespace) -> int:
+    regions = [r.strip() for r in args.regions.split(",")] if args.regions else [None]
+    results = []
+    for region in regions:
+        args.region = region or args.region
+        results.append(_client(args).create_api(args.url))
+    _emit(results if len(results) > 1 else results[0], args.json)
+    return 0
+
+
+def cmd_list(args: argparse.Namespace) -> int:
+    records = _client(args).list_api()
+    if args.json:
+        print(json.dumps(records, indent=2))
+    elif not records:
+        print("No proxies found.")
+    else:
+        _emit(records, False)
+    return 0
+
+
+def cmd_update(args: argparse.Namespace) -> int:
+    ok = _client(args).update_api(args.api_id, args.url)
+    print(f"Update {args.api_id} => {'Success!' if ok else 'Failed!'}")
+    return 0 if ok else 1
+
+
+def cmd_delete(args: argparse.Namespace) -> int:
+    ok = _client(args).delete_api(args.api_id)
+    print(f"Delete {args.api_id} => {'Success!' if ok else 'Failed!'}")
+    return 0 if ok else 1
+
+
+def cmd_cleanup(args: argparse.Namespace) -> int:
+    client = _client(args)
+    if not args.yes:
+        reply = input("Delete ALL UltimateSpray proxies in this region? [y/N] ")
+        if reply.strip().lower() not in ("y", "yes"):
+            print("Aborted.")
+            return 1
+    deleted = client.cleanup()
+    print(f"Deleted {len(deleted)} proxy(ies): {', '.join(deleted) or '(none)'}")
+    return 0
+
+
+def cmd_spray_check(args: argparse.Namespace) -> int:
+    proxy = RotatingProxy(args.proxy_url)
+    for i in range(args.count):
+        try:
+            resp = proxy.get(args.path, timeout=15)
+            print(f"[{i + 1}/{args.count}] {resp.status_code} {resp.url}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"[{i + 1}/{args.count}] ERROR: {exc}")
+    return 0
+
+
+DISPATCH = {
+    "create": cmd_create,
+    "list": cmd_list,
+    "update": cmd_update,
+    "delete": cmd_delete,
+    "cleanup": cmd_cleanup,
+    "spray-check": cmd_spray_check,
+}
+
+
+def _route_legacy(args: argparse.Namespace) -> int:
+    """Map deprecated --command flags onto the new subcommands."""
+    logger.warning(
+        "--command is deprecated; use `ultimatespray %s ...` instead", args.command
+    )
+    args.subcommand = args.command
+    if args.command in ("create", "update"):
+        args.url = args.url  # already set
+    args.regions = None
+    if args.command == "cleanup":
+        args.yes = True
+    handler = DISPATCH.get(args.command)
+    if not handler:
+        print(f"[ERROR] Unsupported command: {args.command}", file=sys.stderr)
+        return 1
+    return handler(args)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="%(levelname)s %(message)s",
+    )
+
+    try:
+        if args.command:  # legacy path
+            return _route_legacy(args)
+        if not args.subcommand:
+            parser.print_help()
+            return 1
+        return DISPATCH[args.subcommand](args)
+    except CredentialError as exc:
+        print(f"[ERROR] {exc}", file=sys.stderr)
+        return 2
+    except (ValueError, KeyError) as exc:
+        print(f"[ERROR] {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
