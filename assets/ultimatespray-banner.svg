@@ -1,68 +1,91 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="410" viewBox="0 0 1400 410" role="img" aria-labelledby="title desc">
-  <title id="title">UltimateSpray: from authorized scope to evidence</title>
-  <desc id="desc">A conceptual overview connecting test scope, AWS API Gateway infrastructure, identity signals, and verified findings.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" role="img" aria-labelledby="title desc">
+  <title id="title">UltimateSpray: global paths from operator to target host</title>
+  <desc id="desc">A computer connects through several points on a stylized world map. Multiple paths converge on one target host.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#081423"/>
-      <stop offset="0.58" stop-color="#102a3b"/>
-      <stop offset="1" stop-color="#0a1929"/>
+      <stop offset="0" stop-color="#071321"/>
+      <stop offset="0.6" stop-color="#102a3c"/>
+      <stop offset="1" stop-color="#091626"/>
     </linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#50dfd0"/>
-      <stop offset="1" stop-color="#8abaff"/>
+    <linearGradient id="route" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4be1d6"/>
+      <stop offset="0.72" stop-color="#83cbd7"/>
+      <stop offset="1" stop-color="#ffc07d"/>
     </linearGradient>
-    <radialGradient id="halo">
-      <stop offset="0" stop-color="#37c9c8" stop-opacity="0.15"/>
-      <stop offset="1" stop-color="#37c9c8" stop-opacity="0"/>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#37d2d0" stop-opacity="0.17"/>
+      <stop offset="1" stop-color="#37d2d0" stop-opacity="0"/>
     </radialGradient>
-    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
-      <path d="M42 0H0V42" fill="none" stroke="#a7d7df" stroke-opacity="0.055"/>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#a0cfdb" stroke-opacity="0.05"/>
     </pattern>
   </defs>
 
-  <rect width="1400" height="410" rx="24" fill="url(#background)"/>
-  <rect width="1400" height="410" rx="24" fill="url(#grid)"/>
-  <circle cx="705" cy="310" r="400" fill="url(#halo)"/>
-  <path d="M70 160h1260" stroke="url(#accent)" stroke-opacity="0.32"/>
+  <rect width="1400" height="420" rx="24" fill="url(#background)"/>
+  <rect width="1400" height="420" rx="24" fill="url(#grid)"/>
+  <circle cx="770" cy="250" r="420" fill="url(#glow)"/>
+  <text x="64" y="88" fill="#f3f9fc" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="62" font-weight="800" letter-spacing="-2.6">Ultimate<tspan fill="#55dfd2">Spray</tspan></text>
+  <text x="67" y="124" fill="#b8d0dc" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20">Authorized identity assessment · global routing view</text>
+  <path d="M64 151h1272" stroke="#5abec6" stroke-opacity="0.22"/>
 
-  <text x="72" y="103" fill="#f1f8fb" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-2.7">Ultimate<tspan fill="#57ded1">Spray</tspan></text>
-  <text x="75" y="139" fill="#b8d0dd" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="500">A macro view of an authorized identity security assessment</text>
-
-  <g fill="none" stroke="#6fcece" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M348 266h38"/><path d="m378 258 10 8-10 8"/>
-    <path d="M678 266h38"/><path d="m708 258 10 8-10 8"/>
-    <path d="M1008 266h38"/><path d="m1038 258 10 8-10 8"/>
-  </g>
-  <g fill="#102b3b" stroke="#79c9d1" stroke-opacity="0.4" stroke-width="1.5">
-    <rect x="70" y="188" width="278" height="173" rx="20"/>
-    <rect x="400" y="188" width="278" height="173" rx="20"/>
-    <rect x="730" y="188" width="278" height="173" rx="20"/>
-    <rect x="1060" y="188" width="278" height="173" rx="20"/>
-  </g>
-  <g fill="#15394a">
-    <circle cx="209" cy="241" r="36"/><circle cx="539" cy="241" r="36"/>
-    <circle cx="869" cy="241" r="36"/><circle cx="1199" cy="241" r="36"/>
+  <!-- Stylized world map and latitude / longitude guides. -->
+  <ellipse cx="750" cy="270" rx="350" ry="126" fill="#0e2b3b" stroke="#63b8c1" stroke-opacity="0.32" stroke-width="2"/>
+  <path d="M400 270h700M750 144v252M430 218h640M430 322h640" fill="none" stroke="#8ccbd1" stroke-opacity="0.09"/>
+  <ellipse cx="750" cy="270" rx="230" ry="126" fill="none" stroke="#8ccbd1" stroke-opacity="0.09"/>
+  <ellipse cx="750" cy="270" rx="120" ry="126" fill="none" stroke="#8ccbd1" stroke-opacity="0.09"/>
+  <g fill="#1d5261" stroke="#398892" stroke-width="1.5" stroke-linejoin="round" opacity="0.9">
+    <path d="M475 216 503 194 544 185 573 196 588 215 618 223 611 242 587 247 572 264 543 270 521 250 491 248 472 235Z"/>
+    <path d="M554 279 584 270 614 283 628 306 612 344 599 372 583 358 574 327 558 309Z"/>
+    <path d="M671 211 698 198 729 203 749 219 733 235 703 234 680 227Z"/>
+    <path d="M706 242 749 233 778 247 791 270 779 304 754 336 728 325 711 289 698 261Z"/>
+    <path d="M748 205 788 187 846 187 888 197 929 211 976 234 962 251 929 258 904 247 871 259 835 247 807 230 776 227Z"/>
+    <path d="M870 309 902 293 937 304 956 327 934 344 898 340 875 326Z"/>
   </g>
 
-  <g fill="none" stroke="#78e6dc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="195" y="224" width="28" height="34" rx="3"/>
-    <path d="M201 233h16M201 241h10m-10 8 4 4 8-9"/>
-    <path d="m539 225 13 8v16l-13 8-13-8v-16z"/>
-    <circle cx="539" cy="241" r="3" fill="#78e6dc" stroke="none"/>
-    <path d="M526 234h-10m36 0h10m-23 23v8"/>
-    <path d="m869 220 17 7v14c0 12-7 19-17 24-10-5-17-12-17-24v-14z"/>
-    <path d="m861 242 6 6 11-13"/>
-    <rect x="1185" y="223" width="28" height="36" rx="3"/>
-    <path d="M1191 251v-7m8 7v-15m8 15v-11"/>
+  <!-- One operator connection fans out across the map. -->
+  <g fill="none" stroke="#67ded5" stroke-width="2.5" stroke-linecap="round" opacity="0.8">
+    <path d="M307 270 C376 270 421 265 474 265"/>
+    <path d="M474 265 Q515 225 551 226" stroke-opacity="0.55"/>
+    <path d="M474 265 Q523 312 593 314" stroke-opacity="0.55"/>
+    <path d="M474 265 Q600 170 722 215" stroke-opacity="0.55"/>
+    <path d="M474 265 Q660 326 770 282" stroke-opacity="0.55"/>
+    <path d="M474 265 Q735 176 914 224" stroke-opacity="0.55"/>
   </g>
 
-  <g fill="#f0f7fa" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="750" letter-spacing="1.1" text-anchor="middle">
-    <text x="209" y="311">SCOPE</text><text x="539" y="311">INFRASTRUCTURE</text>
-    <text x="869" y="311">IDENTITY</text><text x="1199" y="311">EVIDENCE</text>
+  <!-- Distributed routes converge on the assessment target. -->
+  <g fill="none" stroke="url(#route)" stroke-width="2.8" stroke-linecap="round">
+    <path d="M551 226 C730 130 1011 144 1169 261" opacity="0.72"/>
+    <path d="M593 314 C766 392 1028 360 1169 270" opacity="0.66"/>
+    <path d="M722 215 C899 145 1052 184 1169 263" opacity="0.9"/>
+    <path d="M770 282 C925 305 1073 292 1169 270" opacity="0.78"/>
+    <path d="M914 224 C1020 215 1100 232 1169 265" opacity="0.95"/>
   </g>
-  <g fill="#a9c7d2" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" text-anchor="middle">
-    <text x="209" y="337">Authorized targets</text><text x="539" y="337">AWS API Gateway</text>
-    <text x="869" y="337">Authentication signals</text><text x="1199" y="337">Verified outcomes</text>
+  <g fill="#61e3d8" stroke="#102b3a" stroke-width="5">
+    <circle cx="551" cy="226" r="7"/><circle cx="593" cy="314" r="7"/>
+    <circle cx="722" cy="215" r="7"/><circle cx="770" cy="282" r="7"/>
+    <circle cx="914" cy="224" r="7"/>
   </g>
-  <rect x="0.5" y="0.5" width="1399" height="409" rx="23.5" fill="none" stroke="#86bdc9" stroke-opacity="0.24"/>
+
+  <!-- Operator computer. -->
+  <rect x="70" y="219" width="237" height="126" rx="12" fill="#14384a" stroke="#72d6d3" stroke-width="3"/>
+  <rect x="83" y="232" width="211" height="97" rx="5" fill="#091c2c"/>
+  <path d="M113 263h73m-73 16h116m-116 16h86" stroke="#60d6d1" stroke-width="5" stroke-linecap="round" opacity="0.74"/>
+  <path d="M188 346v15m-55 4h110" stroke="#8fd8d6" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="269" cy="247" r="5" fill="#61e3d8"/>
+
+  <!-- One destination host. -->
+  <circle cx="1202" cy="270" r="69" fill="#e8a65d" fill-opacity="0.08" stroke="#ffc07d" stroke-opacity="0.55" stroke-width="2"/>
+  <circle cx="1202" cy="270" r="47" fill="#e8a65d" fill-opacity="0.06" stroke="#ffc07d" stroke-width="2"/>
+  <rect x="1177" y="246" width="50" height="48" rx="8" fill="#4e3b38" stroke="#ffd19b" stroke-width="3"/>
+  <path d="M1188 258h28m-28 11h28m-28 11h28" stroke="#ffd19b" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="1216" cy="258" r="2" fill="#ffd19b"/>
+  <circle cx="1216" cy="269" r="2" fill="#ffd19b"/>
+  <circle cx="1216" cy="280" r="2" fill="#ffd19b"/>
+
+  <g fill="#bfd6de" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="1.6" text-anchor="middle">
+    <text x="188" y="395">OPERATOR</text>
+    <text x="750" y="395">GLOBAL EGRESS</text>
+    <text x="1202" y="395">TARGET HOST</text>
+  </g>
+  <rect x="0.5" y="0.5" width="1399" height="419" rx="23.5" fill="none" stroke="#86bdc9" stroke-opacity="0.24"/>
 </svg>

@@ -1,4 +1,4 @@
-![UltimateSpray assessment overview: scope, infrastructure, identity, and evidence](assets/ultimatespray-banner.svg)
+![UltimateSpray: an operator computer, global routing paths, and a target host](assets/ultimatespray-banner.svg)
 
 # UltimateSpray
 
@@ -14,6 +14,10 @@ Security.
 > [AWS Acceptable Use Policy](https://aws.amazon.com/aup/) and the law.
 
 ## Assessment overview
+
+The banner illustrates one operator connecting through distributed proxy routes
+to an approved target host. It is a conceptual view; the route drawing does not
+claim a distinct IP for every request or prove an authentication outcome.
 
 At a high level, an assessment moves through four stages:
 
