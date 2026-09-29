@@ -1,4 +1,4 @@
-![UltimateSpray: an operator computer, global routing paths, and a target host](assets/ultimatespray-banner.svg)
+![UltimateSpray: a cybersecurity console routes through a world map to an approved target host](assets/ultimatespray-banner.svg)
 
 # UltimateSpray
 

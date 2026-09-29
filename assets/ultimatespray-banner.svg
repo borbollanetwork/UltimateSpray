@@ -1,91 +1,159 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" role="img" aria-labelledby="title desc">
-  <title id="title">UltimateSpray: global paths from operator to target host</title>
-  <desc id="desc">A computer connects through several points on a stylized world map. Multiple paths converge on one target host.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="500" viewBox="0 0 1400 500" role="img" aria-labelledby="title desc">
+  <title id="title">UltimateSpray — global routing for authorized security assessments</title>
+  <desc id="desc">A cybersecurity console connects to five illuminated nodes on a world map. Their routes converge on a target server inside a magenta reticle. The illustration is conceptual.</desc>
   <defs>
-    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#071321"/>
-      <stop offset="0.6" stop-color="#102a3c"/>
-      <stop offset="1" stop-color="#091626"/>
+    <linearGradient id="background" x2="1" y2="1">
+      <stop stop-color="#05090f"/>
+      <stop offset=".55" stop-color="#091624"/>
+      <stop offset="1" stop-color="#080c17"/>
     </linearGradient>
-    <linearGradient id="route" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#4be1d6"/>
-      <stop offset="0.72" stop-color="#83cbd7"/>
-      <stop offset="1" stop-color="#ffc07d"/>
+    <linearGradient id="route" x2="1">
+      <stop stop-color="#36f5d0"/>
+      <stop offset=".65" stop-color="#56d8ff"/>
+      <stop offset="1" stop-color="#fd5fa9"/>
     </linearGradient>
-    <radialGradient id="glow">
-      <stop offset="0" stop-color="#37d2d0" stop-opacity="0.17"/>
-      <stop offset="1" stop-color="#37d2d0" stop-opacity="0"/>
+    <radialGradient id="mapGlow">
+      <stop stop-color="#00dcb5" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#00dcb5" stop-opacity="0"/>
     </radialGradient>
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M40 0H0V40" fill="none" stroke="#a0cfdb" stroke-opacity="0.05"/>
+    <radialGradient id="targetGlow">
+      <stop stop-color="#fa408e" stop-opacity=".15"/>
+      <stop offset="1" stop-color="#fa408e" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#65afbc" stroke-opacity=".055"/>
+      <circle cx="0" cy="0" r="1" fill="#75d4db" fill-opacity=".15"/>
     </pattern>
+    <pattern id="landDots" width="7" height="7" patternUnits="userSpaceOnUse">
+      <rect width="7" height="7" fill="#0c2c35"/>
+      <circle cx="3.5" cy="3.5" r="1.15" fill="#358c96"/>
+    </pattern>
+    <pattern id="scanlines" width="4" height="4" patternUnits="userSpaceOnUse">
+      <path d="M0 0h4" stroke="#8fffe0" stroke-opacity=".06"/>
+    </pattern>
+    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="frame"><rect width="1400" height="500" rx="20"/></clipPath>
   </defs>
 
-  <rect width="1400" height="420" rx="24" fill="url(#background)"/>
-  <rect width="1400" height="420" rx="24" fill="url(#grid)"/>
-  <circle cx="770" cy="250" r="420" fill="url(#glow)"/>
-  <text x="64" y="88" fill="#f3f9fc" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="62" font-weight="800" letter-spacing="-2.6">Ultimate<tspan fill="#55dfd2">Spray</tspan></text>
-  <text x="67" y="124" fill="#b8d0dc" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20">Authorized identity assessment · global routing view</text>
-  <path d="M64 151h1272" stroke="#5abec6" stroke-opacity="0.22"/>
+  <g clip-path="url(#frame)">
+    <rect width="1400" height="500" fill="url(#background)"/>
+    <rect width="1400" height="500" fill="url(#grid)"/>
+    <ellipse cx="730" cy="298" rx="480" ry="230" fill="url(#mapGlow)"/>
+    <circle cx="1210" cy="300" r="175" fill="url(#targetGlow)"/>
+    <!-- Quiet circuit traces frame the composition. -->
+    <g fill="none" stroke="#2b6c7c" stroke-width="1" opacity=".35">
+      <path d="M0 134h27l19 19h48M1400 127h-29l-30 30h-57M0 397h32l30-30h25M1400 413h-35l-23-23h-43"/>
+      <path d="M315 0v23l25 25h101M1062 0v20l-24 24h-102"/>
+      <circle cx="94" cy="153" r="3"/><circle cx="1284" cy="157" r="3"/>
+      <circle cx="87" cy="367" r="3"/><circle cx="1299" cy="390" r="3"/>
+    </g>
 
-  <!-- Stylized world map and latitude / longitude guides. -->
-  <ellipse cx="750" cy="270" rx="350" ry="126" fill="#0e2b3b" stroke="#63b8c1" stroke-opacity="0.32" stroke-width="2"/>
-  <path d="M400 270h700M750 144v252M430 218h640M430 322h640" fill="none" stroke="#8ccbd1" stroke-opacity="0.09"/>
-  <ellipse cx="750" cy="270" rx="230" ry="126" fill="none" stroke="#8ccbd1" stroke-opacity="0.09"/>
-  <ellipse cx="750" cy="270" rx="120" ry="126" fill="none" stroke="#8ccbd1" stroke-opacity="0.09"/>
-  <g fill="#1d5261" stroke="#398892" stroke-width="1.5" stroke-linejoin="round" opacity="0.9">
-    <path d="M475 216 503 194 544 185 573 196 588 215 618 223 611 242 587 247 572 264 543 270 521 250 491 248 472 235Z"/>
-    <path d="M554 279 584 270 614 283 628 306 612 344 599 372 583 358 574 327 558 309Z"/>
-    <path d="M671 211 698 198 729 203 749 219 733 235 703 234 680 227Z"/>
-    <path d="M706 242 749 233 778 247 791 270 779 304 754 336 728 325 711 289 698 261Z"/>
-    <path d="M748 205 788 187 846 187 888 197 929 211 976 234 962 251 929 258 904 247 871 259 835 247 807 230 776 227Z"/>
-    <path d="M870 309 902 293 937 304 956 327 934 344 898 340 875 326Z"/>
+    <text x="60" y="87" fill="#edf8ff" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="62" font-weight="800" letter-spacing="-2.7">Ultimate<tspan fill="#3af2ce">Spray</tspan></text>
+    <g font-family="Consolas, Liberation Mono, monospace">
+      <text x="63" y="123" fill="#96b8c7" font-size="16" letter-spacing="2">IDENTITY SECURITY / GLOBAL ROUTING</text>
+      <rect x="1100" y="51" width="239" height="32" rx="4" fill="#0a2427" stroke="#2a7e73"/>
+      <path d="M1116 63l5-3 5 3v6l-5 3-5-3Z" fill="none" stroke="#4bf2cd"/>
+      <text x="1140" y="72" fill="#7ae7d3" font-size="12" letter-spacing="1.2">AUTHORIZED ASSESSMENT</text>
+      <text x="1338" y="112" fill="#587684" font-size="11" text-anchor="end" letter-spacing="1.5">CONCEPTUAL NETWORK VIEW</text>
+    </g>
+    <path d="M60 151h1280" stroke="#255461"/>
+    <path d="M60 151h150" stroke="#3af2ce" stroke-width="2"/>
+    <path d="M1331 147l8 4-8 4" fill="none" stroke="#508391"/>
+
+    <!-- World map: distributed egress nodes, not measured traffic. -->
+    <g transform="translate(0 28)">
+      <ellipse cx="750" cy="270" rx="350" ry="126" fill="#071a24" fill-opacity=".65" stroke="#337a86" stroke-opacity=".6"/>
+      <g fill="none" stroke="#448492" stroke-opacity=".16">
+        <path d="M400 270h700M750 144v252M430 218h640M430 322h640"/>
+        <ellipse cx="750" cy="270" rx="230" ry="126"/>
+        <ellipse cx="750" cy="270" rx="120" ry="126"/>
+      </g>
+      <g fill="url(#landDots)" stroke="#3c8b96" stroke-width="1" stroke-linejoin="round">
+        <path d="M475 216 503 194 544 185 573 196 588 215 618 223 611 242 587 247 572 264 543 270 521 250 491 248 472 235Z"/>
+        <path d="M554 279 584 270 614 283 628 306 612 344 599 372 583 358 574 327 558 309Z"/>
+        <path d="M671 211 698 198 729 203 749 219 733 235 703 234 680 227Z"/>
+        <path d="M706 242 749 233 778 247 791 270 779 304 754 336 728 325 711 289 698 261Z"/>
+        <path d="M748 205 788 187 846 187 888 197 929 211 976 234 962 251 929 258 904 247 871 259 835 247 807 230 776 227Z"/>
+        <path d="M870 309 902 293 937 304 956 327 934 344 898 340 875 326Z"/>
+      </g>
+      <!-- Operator connection fans out through the map. -->
+      <g fill="none" stroke="#3af2ce" stroke-linecap="round">
+        <path d="M302 270h43l24-12h48l23 7h34" stroke-width="2.5" filter="url(#neon)"/>
+        <g stroke-width="1.5" stroke-opacity=".4" stroke-dasharray="4 6">
+          <path d="M474 265Q515 225 551 226M474 265Q523 312 593 314M474 265Q600 170 722 215M474 265Q660 326 770 282M474 265Q735 176 914 224"/>
+        </g>
+      </g>
+      <!-- Five global routes converge on one destination. -->
+      <g fill="none" stroke="url(#route)" stroke-width="2" stroke-linecap="round" filter="url(#neon)">
+        <path d="M551 226C730 130 1011 144 1162 261" opacity=".75"/>
+        <path d="M593 314C766 392 1028 360 1162 276" opacity=".65"/>
+        <path d="M722 215C899 145 1052 184 1162 265" opacity=".85"/>
+        <path d="M770 282C925 305 1073 292 1162 270" opacity=".8"/>
+        <path d="M914 224C1020 215 1100 232 1162 268"/>
+      </g>
+      <g fill="#071923" stroke="#3af2ce" stroke-width="1.5">
+        <circle cx="551" cy="226" r="13"/><circle cx="593" cy="314" r="13"/>
+        <circle cx="722" cy="215" r="13"/><circle cx="770" cy="282" r="13"/>
+        <circle cx="914" cy="224" r="13"/>
+      </g>
+      <g fill="#77ffe0" filter="url(#neon)">
+        <circle cx="551" cy="226" r="4"/><circle cx="593" cy="314" r="4"/>
+        <circle cx="722" cy="215" r="4"/><circle cx="770" cy="282" r="4"/>
+        <circle cx="914" cy="224" r="4"/>
+      </g>
+      <g fill="#77b7c2" font-family="Consolas, Liberation Mono, monospace" font-size="10" letter-spacing="1">
+        <text x="537" y="204">01</text><text x="609" y="337">02</text>
+        <text x="706" y="193">03</text><text x="783" y="311">04</text><text x="928" y="207">05</text>
+      </g>
+    </g>
+
+    <!-- Operator terminal. -->
+    <path d="M64 242v-14h18M291 228h18v14M64 365v14h18M291 379h18v-14" fill="none" stroke="#3af2ce" stroke-width="2"/>
+    <rect x="72" y="237" width="230" height="129" rx="6" fill="#0b202a" stroke="#578c97" stroke-width="1.5"/>
+    <rect x="82" y="247" width="210" height="106" rx="2" fill="#050e16"/>
+    <rect x="82" y="247" width="210" height="106" fill="url(#scanlines)"/>
+    <path d="M83 268h209" stroke="#234452"/>
+    <g fill="#476b79"><circle cx="92" cy="257" r="2.5"/><circle cx="102" cy="257" r="2.5"/><circle cx="112" cy="257" r="2.5"/></g>
+    <g font-family="Consolas, Liberation Mono, monospace" font-size="12">
+      <text x="97" y="289" fill="#6b9aa8">security@operator</text>
+      <text x="97" y="311" fill="#4bf2cd">&gt; ultimatespray</text>
+      <path d="M98 328h8l-8 8" fill="none" stroke="#4bf2cd" stroke-width="1.5"/>
+      <rect x="116" y="329" width="7" height="10" fill="#4bf2cd"/>
+    </g>
+    <path d="M187 367v17m-44 1h88" stroke="#578c97" stroke-width="5" stroke-linecap="round"/>
+
+    <!-- Target host with a cyber HUD reticle. -->
+    <g transform="translate(1208 298)">
+      <circle r="76" fill="none" stroke="#b74580" stroke-opacity=".4" stroke-dasharray="2 8"/>
+      <path d="M-43-59A73 73 0 0 1 59-43M43 59A73 73 0 0 1-59 43" fill="none" stroke="#fa5eab" stroke-width="2"/>
+      <circle r="52" fill="#261426" fill-opacity=".65" stroke="#fa5eab" stroke-opacity=".7"/>
+      <path d="M-88 0h22M66 0h22M0-88v22M0 66v22" stroke="#fd70b4" stroke-width="1.5"/>
+      <path d="M-34-31v-9h9M25-40h9v9M-34 31v9h9M25 40h9v-9" fill="none" stroke="#fd70b4"/>
+      <g fill="#231d32" stroke="#ff93c5" stroke-width="1.4">
+        <rect x="-24" y="-26" width="48" height="15" rx="3"/>
+        <rect x="-24" y="-7" width="48" height="15" rx="3"/>
+        <rect x="-24" y="12" width="48" height="15" rx="3"/>
+      </g>
+      <g stroke="#a86591"><path d="M-15-18h18M-15 1h18M-15 20h18"/></g>
+      <g fill="#ff93c5" filter="url(#neon)"><circle cx="14" cy="-18" r="2"/><circle cx="14" cy="1" r="2"/><circle cx="14" cy="20" r="2"/></g>
+    </g>
+
+    <g font-family="Consolas, Liberation Mono, monospace" text-anchor="middle">
+      <g font-size="14" font-weight="700" letter-spacing="2">
+        <text x="187" y="434" fill="#6de5ce">OPERATOR</text>
+        <text x="750" y="434" fill="#6de5ce">GLOBAL EGRESS</text>
+        <text x="1208" y="434" fill="#f395c1">TARGET HOST</text>
+      </g>
+      <g fill="#648896" font-size="11" letter-spacing=".8">
+        <text x="187" y="456">SECURITY CONSOLE</text>
+        <text x="750" y="456">AWS API GATEWAY / MULTI-REGION</text>
+        <text x="1208" y="456">APPROVED SCOPE</text>
+      </g>
+    </g>
+    <path d="M23 23h25M23 23v25M1352 23h25v25M23 452v25h25M1352 477h25v-25" fill="none" stroke="#447885" stroke-width="2"/>
   </g>
-
-  <!-- One operator connection fans out across the map. -->
-  <g fill="none" stroke="#67ded5" stroke-width="2.5" stroke-linecap="round" opacity="0.8">
-    <path d="M307 270 C376 270 421 265 474 265"/>
-    <path d="M474 265 Q515 225 551 226" stroke-opacity="0.55"/>
-    <path d="M474 265 Q523 312 593 314" stroke-opacity="0.55"/>
-    <path d="M474 265 Q600 170 722 215" stroke-opacity="0.55"/>
-    <path d="M474 265 Q660 326 770 282" stroke-opacity="0.55"/>
-    <path d="M474 265 Q735 176 914 224" stroke-opacity="0.55"/>
-  </g>
-
-  <!-- Distributed routes converge on the assessment target. -->
-  <g fill="none" stroke="url(#route)" stroke-width="2.8" stroke-linecap="round">
-    <path d="M551 226 C730 130 1011 144 1169 261" opacity="0.72"/>
-    <path d="M593 314 C766 392 1028 360 1169 270" opacity="0.66"/>
-    <path d="M722 215 C899 145 1052 184 1169 263" opacity="0.9"/>
-    <path d="M770 282 C925 305 1073 292 1169 270" opacity="0.78"/>
-    <path d="M914 224 C1020 215 1100 232 1169 265" opacity="0.95"/>
-  </g>
-  <g fill="#61e3d8" stroke="#102b3a" stroke-width="5">
-    <circle cx="551" cy="226" r="7"/><circle cx="593" cy="314" r="7"/>
-    <circle cx="722" cy="215" r="7"/><circle cx="770" cy="282" r="7"/>
-    <circle cx="914" cy="224" r="7"/>
-  </g>
-
-  <!-- Operator computer. -->
-  <rect x="70" y="219" width="237" height="126" rx="12" fill="#14384a" stroke="#72d6d3" stroke-width="3"/>
-  <rect x="83" y="232" width="211" height="97" rx="5" fill="#091c2c"/>
-  <path d="M113 263h73m-73 16h116m-116 16h86" stroke="#60d6d1" stroke-width="5" stroke-linecap="round" opacity="0.74"/>
-  <path d="M188 346v15m-55 4h110" stroke="#8fd8d6" stroke-width="7" stroke-linecap="round"/>
-  <circle cx="269" cy="247" r="5" fill="#61e3d8"/>
-
-  <!-- One destination host. -->
-  <circle cx="1202" cy="270" r="69" fill="#e8a65d" fill-opacity="0.08" stroke="#ffc07d" stroke-opacity="0.55" stroke-width="2"/>
-  <circle cx="1202" cy="270" r="47" fill="#e8a65d" fill-opacity="0.06" stroke="#ffc07d" stroke-width="2"/>
-  <rect x="1177" y="246" width="50" height="48" rx="8" fill="#4e3b38" stroke="#ffd19b" stroke-width="3"/>
-  <path d="M1188 258h28m-28 11h28m-28 11h28" stroke="#ffd19b" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="1216" cy="258" r="2" fill="#ffd19b"/>
-  <circle cx="1216" cy="269" r="2" fill="#ffd19b"/>
-  <circle cx="1216" cy="280" r="2" fill="#ffd19b"/>
-
-  <g fill="#bfd6de" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="1.6" text-anchor="middle">
-    <text x="188" y="395">OPERATOR</text>
-    <text x="750" y="395">GLOBAL EGRESS</text>
-    <text x="1202" y="395">TARGET HOST</text>
-  </g>
-  <rect x="0.5" y="0.5" width="1399" height="419" rx="23.5" fill="none" stroke="#86bdc9" stroke-opacity="0.24"/>
+  <rect x=".5" y=".5" width="1399" height="499" rx="19.5" fill="none" stroke="#2c495c"/>
 </svg>
