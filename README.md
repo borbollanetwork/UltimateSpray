@@ -1,6 +1,4 @@
-![UltimateSpray: a cybersecurity console routes through a world map to an approved target host](assets/ultimatespray-banner.svg)
-
-# UltimateSpray
+# ![UltimateSpray: a cybersecurity console routes through a world map to an approved target host](assets/ultimatespray-banner.svg)
 
 UltimateSpray manages AWS API Gateway pass-through proxies for authorized
 identity-security assessments, including controlled password-spray testing.
