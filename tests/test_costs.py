@@ -72,9 +72,10 @@ def test_small_nonzero_cost_is_displayed_as_nonzero():
 def test_estimator_json_never_initializes_network_or_aws(capsys):
     with mock.patch.object(cli, "_client", side_effect=AssertionError("AWS accessed")), \
             mock.patch.object(cli, "RotatingProxy", side_effect=AssertionError("Network accessed")):
-        rc = cli.main(["--json", "estimate-cost", "--requests", "150000", "--usd-brl", "5.20"])
+        rc = cli.main(["--json", "estimate-cost", "--requests", "150000"])
     assert rc == 0
     result = json.loads(capsys.readouterr().out)
+    assert Decimal(result["usd_brl"]) == Decimal("5.20")
     assert Decimal(result["estimated_subtotal_brl"]) == Decimal("2.73")
 
 

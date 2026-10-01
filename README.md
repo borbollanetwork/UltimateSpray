@@ -82,6 +82,25 @@ ultimatespray --json list
 
 `us` is a short alias for `ultimatespray`.
 
+### Ajuda em português
+
+O `--help` explica os comandos, os parâmetros disponíveis e seus valores padrão:
+
+```bash
+ultimatespray --help
+ultimatespray estimate-cost --help
+ultimatespray simulate --help
+ultimatespray spray-check --help
+```
+
+Use `ultimatespray <comando> --help` para qualquer outro subcomando.
+As opções globais, como `--profile`, `--region` e `--json`, vêm **antes** do comando;
+os parâmetros específicos vêm depois. Exemplo:
+
+```bash
+ultimatespray --json estimate-cost --requests 150000
+```
+
 ### Offline preview
 
 `simulate` reads a user list, prompts for a password without echoing it, and
@@ -96,45 +115,47 @@ ultimatespray simulate --users ./lab-users.txt \
 Omit the three options to enter the file path, URL, and output path interactively.
 The password is never included in the report. The output file must not exist yet.
 
-### Cost preview in BRL
+### Estimativa de custo em reais
 
-`estimate-cost` calculates an offline AWS subtotal without credentials, resources,
-or network requests:
+`estimate-cost` calcula um subtotal AWS offline, sem credenciais, criação de recursos
+ou requisições. O câmbio de referência de **R$ 5,20 por US$ 1 já vem embutido**:
 
 ```bash
-ultimatespray estimate-cost --requests 150000 --usd-brl 5.20
-ultimatespray --json estimate-cost --requests 150000 --usd-brl 5.20 --data-out-gb 1.5
+ultimatespray estimate-cost --requests 150000
+ultimatespray --json estimate-cost --requests 150000 --data-out-gb 1.5
 ```
 
-At the reference REST rate of US$3.50 per million calls, 150,000 calls cost
-approximately **R$2.73 in request fees** with the specified exchange rate.
-Adding 1.5 GB of billable outbound transfer at US$0.09/GB gives a subtotal of
-approximately **R$3.43**. These are calculations, not a spending limit or a bill.
+Com a tarifa REST de referência de US$ 3,50 por milhão de chamadas, 150 mil chamadas
+resultam em aproximadamente **R$ 2,73 em requisições** usando o câmbio embutido.
+Incluindo 1,5 GB de saída cobrável a US$ 0,09/GB, o subtotal é aproximadamente
+**R$ 3,43**. A estimativa não é uma fatura nem um limite de gasto.
 
-`spray-check` prints the estimate before its first request. For standard API
-Gateway URLs it reads the pricing region from the hostname. Custom proxy domains
-use the selected reference region; set `--pricing-region` explicitly when needed.
-For mixed regions, provide `--pricing-region` and an explicit planning rate with
-`--request-price-per-million` (and `--data-price-per-gb` if estimating traffic).
+`spray-check` mostra a estimativa antes da primeira requisição. Nas URLs padrão do
+API Gateway, identifica a região pelo nome do host. Para domínios personalizados,
+informe `--pricing-region` quando necessário. Para proxies em regiões diferentes,
+informe `--pricing-region` e `--request-price-per-million` com uma tarifa de
+planejamento explícita; ao incluir tráfego, informe também `--data-price-per-gb`.
 
-`simulate` prints its **actual AWS cost of R$0.00** alongside a hypothetical cost
-scenario before prompting for a password, and saves both in `cost_preview` in
-the JSON report. The default scenario assumes one request per unique list entry;
-this does not predict the number of requests in a real authentication flow.
-Override it with `--estimated-requests 150000`.
+`simulate` mostra o **custo AWS real de R$ 0,00** separado do cenário hipotético,
+antes de solicitar a senha, e grava ambos em `cost_preview` no relatório JSON.
+O cenário padrão considera uma requisição por entrada única da lista; isso não
+prevê o volume de um fluxo real de autenticação. Para outro volume hipotético,
+use `--estimated-requests 150000`.
 
-All three commands accept `--usd-brl`, `--pricing-region`,
-`--request-price-per-million`, `--data-out-gb`, and `--data-price-per-gb`.
-The default exchange rate of 5.20 is a planning assumption, not a live quote.
-Without `--data-out-gb`, traffic is **unknown and excluded**, not free.
-The estimate excludes taxes, logs, cache, compute, and other services; credits and
-free allowances are not deducted. Additional calls, including redirects, may
-increase the bill. Total account usage can also affect the applicable price tier.
+Os três comandos aceitam `--pricing-region`, `--request-price-per-million`,
+`--data-out-gb` e `--data-price-per-gb`. O parâmetro `--usd-brl` permanece
+**opcional**, apenas para substituir o câmbio embutido. Esse câmbio é fixo e
+não é consultado ao vivo. Use ponto como separador decimal nos parâmetros.
 
-Reference prices were checked against [AWS API Gateway pricing](https://aws.amazon.com/api-gateway/pricing/)
-on **2026-10-01**, for `us-east-1`, `us-east-2`, `us-west-2`, and `ap-south-1`.
-Other regions require explicit prices. Keep these reference rates up to date;
-no AWS account billing information or exchange-rate service is consulted.
+Sem `--data-out-gb`, o tráfego fica **desconhecido e fora do subtotal**, não gratuito.
+Impostos, logs, cache, computação e outros serviços não estão incluídos; créditos
+e franquias não são descontados. Chamadas adicionais, incluindo redirecionamentos,
+podem aumentar a cobrança. O consumo total da conta também pode afetar a faixa de preço.
+
+Os preços de referência foram conferidos na [página oficial da AWS](https://aws.amazon.com/api-gateway/pricing/)
+em **2026-10-01**, para `us-east-1`, `us-east-2`, `us-west-2` e `ap-south-1`.
+Outras regiões exigem tarifas explícitas. Mantenha esses preços atualizados;
+a ferramenta não consulta a fatura AWS nem serviços de câmbio.
 
 ### Credentials
 

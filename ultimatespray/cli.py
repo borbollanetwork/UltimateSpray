@@ -25,7 +25,7 @@ from urllib.parse import urlsplit
 
 from ultimatespray import __version__
 from ultimatespray.core import DEFAULT_REGION, CredentialError, UltimateSpray
-from ultimatespray.costs import DEFAULT_USD_BRL, estimate_cost, format_estimate
+from ultimatespray.costs import DEFAULT_USD_BRL, PRICE_CHECKED_ON, estimate_cost, format_estimate
 from ultimatespray.simulate import build_report, load_users, validate_url, write_report
 from ultimatespray.spray import RotatingProxy
 
@@ -34,27 +34,57 @@ logger = logging.getLogger("ultimatespray")
 CRED_ARGS = ("profile_name", "access_key", "secret_access_key", "session_token", "region")
 
 
+class PortugueseArgumentParser(argparse.ArgumentParser):
+    """Keep help labels in Portuguese without changing the process-wide locale."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs["add_help"] = False
+        kwargs.setdefault("formatter_class", argparse.RawDescriptionHelpFormatter)
+        super().__init__(*args, **kwargs)
+        self._positionals.title = "Parâmetros posicionais"
+        self._optionals.title = "Opções"
+        self.add_argument("-h", "--help", action="help",
+                          help="Mostra estas instruções e encerra, sem executar o comando")
+
+    def format_usage(self) -> str:
+        return super().format_usage().replace("usage: ", "uso: ", 1)
+
+    def format_help(self) -> str:
+        return super().format_help().replace("usage: ", "uso: ", 1)
+
+
 def _add_credential_args(parser: argparse.ArgumentParser) -> None:
-    group = parser.add_argument_group("AWS credentials")
+    group = parser.add_argument_group("Credenciais e região da AWS (antes do comando)")
     group.add_argument("--profile", "--profile_name", dest="profile_name",
-                       help="AWS profile name to load credentials")
+                       metavar="PERFIL", help="Nome do perfil AWS com as credenciais a carregar")
     group.add_argument("--access-key", "--access_key", dest="access_key",
-                       help="AWS access key")
+                       metavar="CHAVE", help="Chave de acesso AWS; tem prioridade sobre --profile")
     group.add_argument("--secret-access-key", "--secret_access_key",
-                       dest="secret_access_key", help="AWS secret access key")
+                       dest="secret_access_key", metavar="SEGREDO",
+                       help="Chave secreta AWS correspondente à chave de acesso")
     group.add_argument("--session-token", "--session_token", dest="session_token",
-                       help="AWS session token")
-    group.add_argument("--region", help=f"AWS region (default: {DEFAULT_REGION})")
+                       metavar="TOKEN", help="Token de sessão para credenciais temporárias AWS")
+    group.add_argument("--region", metavar="REGIÃO",
+                       help=f"Região AWS usada pelo comando (padrão: {DEFAULT_REGION})")
 
 
 def _add_cost_args(parser: argparse.ArgumentParser) -> None:
-    group = parser.add_argument_group("Offline cost estimate")
-    group.add_argument("--pricing-region", help="Region used for pricing, not deployment")
-    group.add_argument("--usd-brl", default=DEFAULT_USD_BRL,
-                       help="Planning BRL per USD (default: 5.20; not a live quote)")
-    group.add_argument("--request-price-per-million", help="Override USD per million REST calls")
-    group.add_argument("--data-out-gb", help="Estimated billable outbound GB; omitted = unknown")
-    group.add_argument("--data-price-per-gb", help="Override USD per outbound GB")
+    group = parser.add_argument_group("Estimativa de custos sem acesso à rede")
+    group.add_argument("--pricing-region", metavar="REGIÃO",
+                       help="Região usada no preço; não cria recursos. Por padrão, usa a região "
+                            "do proxy em spray-check, ou --region/us-east-1 nos demais comandos")
+    group.add_argument("--usd-brl", default=DEFAULT_USD_BRL, metavar="CÂMBIO",
+                       help=f"Opcional: substitui o câmbio embutido de R$ {DEFAULT_USD_BRL} "
+                            "por US$ 1; é uma referência fixa, não uma cotação ao vivo")
+    group.add_argument("--request-price-per-million", metavar="USD",
+                       help="Substitui a tarifa REST por milhão de chamadas; padrão US$ 3.50 "
+                            "nas regiões de referência. Exigido em outras regiões")
+    group.add_argument("--data-out-gb", metavar="GB",
+                       help="Volume estimado de saída cobrável em GB; se omitido, "
+                            "o tráfego fica fora do subtotal")
+    group.add_argument("--data-price-per-gb", metavar="USD",
+                       help="Tarifa de saída por GB; padrão US$ 0.09 nas regiões de referência. "
+                            "Requer --data-out-gb")
 
 
 def _cost_estimate(args: argparse.Namespace, requests: int, region: str | None = None) -> dict:
@@ -69,55 +99,115 @@ def _cost_estimate(args: argparse.Namespace, requests: int, region: str | None =
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = PortugueseArgumentParser(
         prog="ultimatespray",
-        description="UltimateSpray - rotating source-IP proxies via AWS API Gateway",
+        description="UltimateSpray — gerenciamento de proxies AWS API Gateway, "
+                    "teste de conectividade e prévia offline de avaliações autorizadas.",
+        epilog="Como consultar os parâmetros de um comando:\n"
+               "  ultimatespray <comando> --help\n\n"
+               "Exemplos:\n"
+               "  ultimatespray estimate-cost --requests 150000\n"
+               "  ultimatespray --json estimate-cost --requests 150000\n"
+               "  ultimatespray --profile meu-perfil --region us-east-1 list\n"
+               "  ultimatespray simulate --help\n\n"
+               "Opções globais (--profile, --region, --json e --verbose) vêm antes do comando.\n"
+               "estimate-cost e simulate não acessam AWS nem enviam requisições.\n"
+               "Sem credenciais explícitas, os comandos AWS usam a cadeia padrão do boto3.",
     )
     parser.add_argument("--version", action="version",
-                        version=f"%(prog)s {__version__}")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging")
-    parser.add_argument("--json", action="store_true", help="Machine-readable output")
+                        version=f"%(prog)s {__version__}", help="Mostra a versão e encerra")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Ativa os registros detalhados")
+    parser.add_argument("--json", action="store_true",
+                        help="Saída JSON em create, list e estimate-cost; use antes do comando")
     _add_credential_args(parser)
 
     # Legacy FireProx flags (deprecated, still routed).
-    parser.add_argument("--command", help=argparse.SUPPRESS)
-    parser.add_argument("--url", help=argparse.SUPPRESS)
-    parser.add_argument("--api_id", help=argparse.SUPPRESS)
+    legacy = parser.add_argument_group("Compatibilidade antiga do FireProx (prefira os subcomandos)")
+    legacy.add_argument("--command", metavar="COMANDO",
+                        help="Seleciona um comando pela interface antiga")
+    legacy.add_argument("--url", metavar="URL",
+                        help="URL usada com --command create ou update")
+    legacy.add_argument("--api_id", metavar="ID",
+                        help="ID da API usado com --command update ou delete")
 
-    sub = parser.add_subparsers(dest="subcommand", metavar="<command>")
+    sub = parser.add_subparsers(dest="subcommand", metavar="<comando>", title="Comandos disponíveis")
 
-    p_create = sub.add_parser("create", help="Create a proxy for a target URL")
-    p_create.add_argument("url", help="Target URL to proxy")
-    p_create.add_argument("--regions", help="Comma-separated regions (one proxy each)")
+    p_create = sub.add_parser("create", help="Cria um proxy para uma URL",
+                             description="Cria uma REST API regional que encaminha chamadas "
+                                         "à URL informada. Requer credenciais AWS.")
+    p_create.add_argument("url", metavar="URL", help="URL completa de destino do proxy")
+    p_create.add_argument("--regions", metavar="REGIÕES",
+                         help="Regiões separadas por vírgula; cria um proxy em cada região. "
+                              "Se omitido, usa --region ou us-east-1")
 
-    sub.add_parser("list", help="List existing proxies")
+    sub.add_parser("list", help="Lista os proxies existentes na região",
+                   description="Lista os proxies da região escolhida com --region. "
+                               "Requer credenciais AWS; --json permite saída estruturada.")
 
-    p_update = sub.add_parser("update", help="Point an existing proxy at a new URL")
-    p_update.add_argument("api_id", help="API ID to update")
-    p_update.add_argument("url", help="New target URL")
+    p_update = sub.add_parser("update", help="Atualiza a URL de destino de um proxy",
+                             description="Altera o destino de uma API existente. Requer credenciais AWS.")
+    p_update.add_argument("api_id", metavar="ID", help="ID da API a atualizar")
+    p_update.add_argument("url", metavar="URL", help="Nova URL completa de destino")
 
-    p_delete = sub.add_parser("delete", help="Delete a proxy by API ID")
-    p_delete.add_argument("api_id", help="API ID to delete")
+    p_delete = sub.add_parser("delete", help="Exclui um proxy pelo ID da API",
+                             description="Exclui a API indicada na região selecionada. "
+                                         "Requer credenciais AWS.")
+    p_delete.add_argument("api_id", metavar="ID", help="ID da API a excluir")
 
-    p_cleanup = sub.add_parser("cleanup", help="Delete ALL UltimateSpray proxies")
-    p_cleanup.add_argument("--yes", action="store_true", help="Skip confirmation")
+    p_cleanup = sub.add_parser("cleanup", help="Exclui os proxies marcados como gerenciados",
+                              description="Exclui, na região selecionada, apenas os proxies com a "
+                                          "tag ultimatespray:managed=true. Requer credenciais AWS.")
+    p_cleanup.add_argument("--yes", action="store_true",
+                           help="Executa a exclusão sem a pergunta de confirmação")
 
-    p_check = sub.add_parser("spray-check", help="Send test requests through a proxy")
-    p_check.add_argument("proxy_url", nargs="+", help="Proxy URL(s) to test")
-    p_check.add_argument("--count", type=int, default=5, help="Requests to send")
-    p_check.add_argument("--path", default="/", help="Path to request")
+    p_check = sub.add_parser("spray-check", help="Testa a conectividade de proxies com chamadas GET",
+                            description="Mostra a estimativa de custo e envia chamadas GET pelos "
+                                        "proxies existentes. Exibe o status HTTP; não valida credenciais.",
+                            epilog="Domínios personalizados: informe --pricing-region para usar a "
+                                   "região de preço correta.\n"
+                                   "Proxies em regiões diferentes: informe --pricing-region e "
+                                   "--request-price-per-million;\n"
+                                   "se incluir tráfego, informe também --data-price-per-gb.")
+    p_check.add_argument("proxy_url", nargs="+", metavar="URL_PROXY",
+                         help="Uma ou mais URLs completas de proxies existentes")
+    p_check.add_argument("--count", type=int, default=5, metavar="N",
+                         help="Total de chamadas GET planejadas, distribuídas entre os proxies "
+                              "(padrão: 5; mínimo: 1)")
+    p_check.add_argument("--path", default="/", metavar="CAMINHO",
+                         help="Caminho solicitado em cada chamada GET (padrão: /)")
     _add_cost_args(p_check)
 
-    p_simulate = sub.add_parser("simulate", help="Preview an offline test without requests")
-    p_simulate.add_argument("--users", help="File with one username per line")
-    p_simulate.add_argument("--url", help="Target URL to show in the preview")
-    p_simulate.add_argument("--output", help="New JSON report file")
-    p_simulate.add_argument("--estimated-requests", type=int,
-                            help="Hypothetical request volume; default: one per unique list entry")
+    p_simulate = sub.add_parser("simulate", help="Simula entradas e relatório sem enviar requisições",
+                               description="Prévia offline: lê a lista, mostra um cenário de custo e "
+                                           "gera um relatório com todos os usuários como não testados.",
+                               epilog="Se --users, --url ou --output forem omitidos, o programa pergunta "
+                                      "os valores.\n"
+                                      "A senha é solicitada no terminal, sem envio ou gravação.\n"
+                                      "Custo AWS da simulação: R$ 0,00. Requer terminal interativo.")
+    p_simulate.add_argument("--users", metavar="ARQUIVO",
+                            help="Lista UTF-8 com um usuário por linha; ignora linhas vazias e duplicatas")
+    p_simulate.add_argument("--url", metavar="URL",
+                            help="URL HTTP(S) mostrada na prévia, sem credenciais, consulta ou fragmento")
+    p_simulate.add_argument("--output", metavar="ARQUIVO",
+                            help="Caminho do relatório JSON; o arquivo ainda não pode existir")
+    p_simulate.add_argument("--estimated-requests", type=int, metavar="N",
+                            help="Volume hipotético para o custo; padrão: 1 por entrada única da lista. "
+                                 "Não representa requisições reais")
     _add_cost_args(p_simulate)
 
-    p_estimate = sub.add_parser("estimate-cost", help="Estimate AWS costs offline; sends no requests")
-    p_estimate.add_argument("--requests", type=int, required=True, help="Expected total REST calls")
+    p_estimate = sub.add_parser("estimate-cost", help="Estima o custo AWS em reais, sem acessar a rede",
+                               description="Calcula um subtotal com preços de referência e câmbio "
+                                           f"embutido de R$ {DEFAULT_USD_BRL}/US$. "
+                                           "Não exige credenciais AWS.",
+                               epilog="Exemplo:\n"
+                                      "  ultimatespray estimate-cost --requests 150000\n\n"
+                                      "O câmbio é fixo e já vem na ferramenta; --usd-brl é opcional.\n"
+                                      "Regiões de referência: us-east-1, us-east-2, us-west-2, ap-south-1.\n"
+                                      f"Preços conferidos em {PRICE_CHECKED_ON}; o subtotal não inclui impostos, "
+                                      "logs ou outros serviços.\n"
+                                      "Créditos e franquias não são descontados. A estimativa não limita gastos.")
+    p_estimate.add_argument("--requests", type=int, required=True, metavar="N",
+                            help="Total previsto de chamadas REST (obrigatório; inteiro não negativo)")
     _add_cost_args(p_estimate)
 
     return parser
