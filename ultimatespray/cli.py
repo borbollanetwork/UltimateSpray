@@ -21,9 +21,11 @@ import getpass
 import json
 import logging
 import sys
+from urllib.parse import urlsplit
 
 from ultimatespray import __version__
 from ultimatespray.core import DEFAULT_REGION, CredentialError, UltimateSpray
+from ultimatespray.costs import DEFAULT_USD_BRL, estimate_cost, format_estimate
 from ultimatespray.simulate import build_report, load_users, validate_url, write_report
 from ultimatespray.spray import RotatingProxy
 
@@ -43,6 +45,27 @@ def _add_credential_args(parser: argparse.ArgumentParser) -> None:
     group.add_argument("--session-token", "--session_token", dest="session_token",
                        help="AWS session token")
     group.add_argument("--region", help=f"AWS region (default: {DEFAULT_REGION})")
+
+
+def _add_cost_args(parser: argparse.ArgumentParser) -> None:
+    group = parser.add_argument_group("Offline cost estimate")
+    group.add_argument("--pricing-region", help="Region used for pricing, not deployment")
+    group.add_argument("--usd-brl", default=DEFAULT_USD_BRL,
+                       help="Planning BRL per USD (default: 5.20; not a live quote)")
+    group.add_argument("--request-price-per-million", help="Override USD per million REST calls")
+    group.add_argument("--data-out-gb", help="Estimated billable outbound GB; omitted = unknown")
+    group.add_argument("--data-price-per-gb", help="Override USD per outbound GB")
+
+
+def _cost_estimate(args: argparse.Namespace, requests: int, region: str | None = None) -> dict:
+    return estimate_cost(
+        requests,
+        region=region or args.pricing_region or args.region or DEFAULT_REGION,
+        usd_brl=args.usd_brl,
+        request_price_per_million=args.request_price_per_million,
+        data_out_gb=args.data_out_gb,
+        data_price_per_gb=args.data_price_per_gb,
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -83,11 +106,19 @@ def build_parser() -> argparse.ArgumentParser:
     p_check.add_argument("proxy_url", nargs="+", help="Proxy URL(s) to test")
     p_check.add_argument("--count", type=int, default=5, help="Requests to send")
     p_check.add_argument("--path", default="/", help="Path to request")
+    _add_cost_args(p_check)
 
     p_simulate = sub.add_parser("simulate", help="Preview an offline test without requests")
     p_simulate.add_argument("--users", help="File with one username per line")
     p_simulate.add_argument("--url", help="Target URL to show in the preview")
     p_simulate.add_argument("--output", help="New JSON report file")
+    p_simulate.add_argument("--estimated-requests", type=int,
+                            help="Hypothetical request volume; default: one per unique list entry")
+    _add_cost_args(p_simulate)
+
+    p_estimate = sub.add_parser("estimate-cost", help="Estimate AWS costs offline; sends no requests")
+    p_estimate.add_argument("--requests", type=int, required=True, help="Expected total REST calls")
+    _add_cost_args(p_estimate)
 
     return parser
 
@@ -161,6 +192,29 @@ def cmd_cleanup(args: argparse.Namespace) -> int:
 def cmd_spray_check(args: argparse.Namespace) -> int:
     if args.count < 1:
         raise ValueError("--count must be at least 1")
+    regions = set()
+    for url in args.proxy_url:
+        parts = (urlsplit(url).hostname or "").split(".")
+        if len(parts) >= 5 and parts[1] == "execute-api" and parts[3:] in (
+            ["amazonaws", "com"], ["amazonaws", "com", "cn"],
+        ):
+            regions.add(parts[2])
+    if len(regions) > 1:
+        if not args.pricing_region or args.request_price_per_million is None:
+            raise ValueError(
+                "Mixed proxy regions: set --pricing-region and --request-price-per-million "
+                "to an explicit planning rate"
+            )
+        if args.data_out_gb is not None and args.data_price_per_gb is None:
+            raise ValueError("Mixed proxy regions: set an explicit --data-price-per-gb")
+        pricing_region = args.pricing_region
+    else:
+        pricing_region = next(iter(regions), None)
+        if pricing_region and args.pricing_region and pricing_region != args.pricing_region:
+            raise ValueError("--pricing-region does not match the proxy region")
+    print(format_estimate(_cost_estimate(args, args.count, pricing_region)), flush=True)
+    print("Volume cobre as chamadas planejadas; redirecionamentos podem gerar chamadas extras.",
+          flush=True)
     proxy = RotatingProxy(args.proxy_url)
     failures = 0
     for i in range(args.count):
@@ -181,14 +235,30 @@ def cmd_simulate(args: argparse.Namespace) -> int:
         raise ValueError("An output file is required")
     users = load_users(users_path)
     url = validate_url(target_url)
+    requests = args.estimated_requests if args.estimated_requests is not None else len(users)
+    estimate = _cost_estimate(args, requests)
+    print("Cenário hipotético; a simulação fará 0 requisições e terá custo AWS de R$ 0,00.")
+    if args.estimated_requests is None:
+        print("Premissa do cenário: 1 requisição por entrada única; não prevê o fluxo real.")
+    print(format_estimate(estimate), flush=True)
     if not sys.stdin.isatty():
         raise ValueError("Interactive terminal required for the password prompt")
     if not getpass.getpass("Senha (não será enviada nem salva): "):
         raise ValueError("A password is required for this preview")
     report = build_report(users, url)
+    report["cost_preview"] = {
+        "actual_aws_cost_brl": "0.00",
+        "hypothetical_estimate": estimate,
+    }
     write_report(output_path, report)
     print(f"Simulação concluída: {len(users)} usuário(s), 0 requisições; todos não testados.")
     print(f"Relatório: {output_path}")
+    return 0
+
+
+def cmd_estimate_cost(args: argparse.Namespace) -> int:
+    estimate = _cost_estimate(args, args.requests)
+    print(json.dumps(estimate, indent=2) if args.json else format_estimate(estimate))
     return 0
 
 
@@ -200,6 +270,7 @@ DISPATCH = {
     "cleanup": cmd_cleanup,
     "spray-check": cmd_spray_check,
     "simulate": cmd_simulate,
+    "estimate-cost": cmd_estimate_cost,
 }
 
 

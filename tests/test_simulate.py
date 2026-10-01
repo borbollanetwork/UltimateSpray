@@ -25,6 +25,8 @@ def test_simulate_writes_unverified_private_report_without_network(tmp_path, mon
     assert report["network_requests"] == 0
     assert report["summary"] == {"users": 2, "not_tested": 2}
     assert [item["outcome"] for item in report["results"]] == ["not_tested"] * 2
+    assert report["cost_preview"]["actual_aws_cost_brl"] == "0.00"
+    assert report["cost_preview"]["hypothetical_estimate"]["requests"] == 2
     assert "example-secret" not in output.read_text() + capsys.readouterr().out
     assert output.stat().st_mode & 0o077 == 0
 
@@ -53,6 +55,29 @@ def test_simulate_does_not_overwrite_existing_report(tmp_path, monkeypatch):
         "--output", str(output),
     ]) == 1
     assert output.read_text() == "existing"
+
+
+def test_simulate_cost_preview_precedes_password_prompt(tmp_path, monkeypatch, capsys):
+    users = tmp_path / "users.txt"
+    users.write_text("user@example.test\n")
+    output = tmp_path / "report.json"
+    monkeypatch.setattr(cli.sys.stdin, "isatty", lambda: True)
+
+    def password_prompt(_):
+        printed = capsys.readouterr().out
+        assert "custo AWS de R$ 0,00" in printed
+        assert "Requisições previstas: 150.000" in printed
+        assert "Subtotal estimado: R$ 2,73" in printed
+        return "example-secret"
+
+    monkeypatch.setattr(cli.getpass, "getpass", password_prompt)
+    assert cli.main([
+        "simulate", "--users", str(users), "--url", "https://lab.example.test",
+        "--output", str(output), "--estimated-requests", "150000", "--usd-brl", "5.20",
+    ]) == 0
+    report = json.loads(output.read_text())
+    assert report["network_requests"] == 0
+    assert report["cost_preview"]["hypothetical_estimate"]["requests"] == 150_000
 
 
 @pytest.mark.parametrize("url", ["file:///etc/passwd", "https://user:pass@host.test/",
